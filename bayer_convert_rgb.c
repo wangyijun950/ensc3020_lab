@@ -1,4 +1,41 @@
+/////////////////////////////////////////////////////////////
+// ConvertBayer8ToBgr()
+// Converts raw BayerGR8 pixels into
+//     BGR pixels.
+//
+//  G | R | G | R              B G R | B G R | B G R | B G R
+// --- --- --- ---            ------- ------- ------- -------
+//  B | G | B | G        |\    B G R | B G R | B G R | B G R
+// --- --- --- ---  -----  \  ------- ------- ------- -------
+//  G | R | G | R   -----  /   B G R | B G R | B G R | B G R
+// --- --- --- ---       |/   ------- ------- ------- -------
+//  B | G | B | G              B G R | B G R | B G R | B G R
+//
+/////////////////////////////////////////////////////////////
+void ConvertBayer8ToBGR(VmbUchar_t* bayerImgDat, VmbUchar_t* bgrOutputDat)
+{
+    VmbUchar_t* newimagedata_start = bgrOutputDat;
 
+    int currentTempIndex = 0;
+    int nearestBluesAvg = 0;
+    int nearestRedsAvg = 0;
+    int nearestGreensAvg = 0;
+
+    for(int j = 0; j < 1100; j++)
+    {
+        for(int i = 0; i < 2752; i++) //G R G R G... 
+        {
+            if(currentTempIndex % 2 == 0 /* even, green */)
+            {
+                //avg blue
+                if(j == 0) //if in the first row, only take next blue
+                {
+                    nearestBluesAvg = *(bayerImgDat+currentTempIndex+2752);
+                }
+                else
+                {
+                    nearestBluesAvg = (*(bayerImgDat + currentTempIndex + 2752) + *(bayerImgDat+currentTempIndex-2752)) / 2;
+                }
                 *bgrOutputDat = nearestBluesAvg; //b
                 bgrOutputDat++;
                 *bgrOutputDat = *(bayerImgDat + currentTempIndex); //g
